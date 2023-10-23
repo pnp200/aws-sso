@@ -166,7 +166,7 @@ func loadCookies(browser rod.Browser) {
 		error(err.Error())
 	}
 
-	data, _ := os.ReadFile(dirname + "/.headless-sso")
+	data, _ := os.ReadFile(dirname + "/.aws-sso")
 	sEnc, _ := b64.StdEncoding.DecodeString(string(data))
 	var cookie *proto.NetworkCookie
 	json.Unmarshal(sEnc, &cookie)
