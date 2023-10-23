@@ -1,5 +1,5 @@
 # aws-sso
-Runs [aws sso login]() headlessly when using the `--no-browser` option.
+Runs [aws sso login]() headlessly when using the `--no-browser` option.    
 change from [headless-sso](https://github.com/mziyabo/headless-sso)
 
 ### Install
