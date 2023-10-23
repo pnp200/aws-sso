@@ -1,6 +1,6 @@
 # aws-sso
 Runs [aws sso login]() headlessly when using the `--no-browser` option.    
-change from [headless-sso](https://github.com/mziyabo/headless-sso)
+> change from [headless-sso](https://github.com/mziyabo/headless-sso)
 
 ### Install
 To download the latest release, run:
