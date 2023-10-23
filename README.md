@@ -7,7 +7,7 @@ To download the latest release, run:
 > For ARM systems, please change ARCH to `arm64`
 
 ``` sh
- curl --silent --location https://github.com/pnp200/aws-sso/releases/latest/download/aws-sso_0.1.0_$(uname -s)_x86_64.tar.gz | tar xz -C /tmp/
+ curl --silent --location https://github.com/pnp200/aws-sso/releases/latest/download/aws-sso_0.2.0_$(uname -s)_x86_64.tar.gz | tar xz -C /tmp/
  sudo mv /tmp/aws-sso /usr/local/bin
 ```
 
