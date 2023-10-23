@@ -22,7 +22,7 @@ go install github.com/pnp200/aws-sso@latest
 aws sso login  --profile login --no-browser | aws-sso
 ```
 
-**Note:** `headless-sso` gets the AWS user credentials from a `.netrc` file with the following format:
+**Note:** `aws-sso` gets the AWS user credentials from a `.netrc` file with the following format:
  > machine name has to be `aws-sso`
 
 ```
