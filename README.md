@@ -26,7 +26,7 @@ aws sso login  --profile login --no-browser | aws-sso
  > machine name has to be `aws-sso`
 
 ```
-machine headless-sso
+machine aws-sso
 login <username>
 password <password>
 account <aws otp secret>
