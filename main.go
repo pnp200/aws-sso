@@ -96,7 +96,7 @@ func ssoLogin(url string) {
 	spinner.Message(color.MagentaString("init headless-browser \n"))
 	spinner.Pause()
 
-	browser := rod.New().MustConnect().Trace(true)
+	browser := rod.New().MustConnect().Trace(false)
 	loadCookies(*browser)
 	defer browser.MustClose()
 
