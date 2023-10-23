@@ -3,20 +3,20 @@ package main
 import (
 	"bufio"
 	"context"
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base32"
 	b64 "encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
 	"regexp"
-	"crypto/hmac"
-	"crypto/sha1"
-	"encoding/base32"
-	"encoding/binary"
 	"strings"
 	"time"
-	"fmt"
 
 	"github.com/fatih/color"
 	"github.com/git-lfs/go-netrc/netrc"
@@ -26,9 +26,6 @@ import (
 	"github.com/go-rod/rod/lib/input"
 	"github.com/go-rod/rod/lib/proto"
 )
-
-// Time before MFA step times out
-const MFA_TIMEOUT = 30
 
 var cfg = yacspin.Config{
 	Frequency:         100 * time.Millisecond,
@@ -86,16 +83,16 @@ func getCredentials() (string, string, string) {
 		panic(".netrc file not found in HOME directory")
 	}
 
-	username := f.FindMachine("headless-sso", "").Login
-	passphrase := f.FindMachine("headless-sso", "").Password
-	secret := f.FindMachine("headless-sso", "").Account
+	username := f.FindMachine("aws-sso", "").Login
+	passphrase := f.FindMachine("aws-sso", "").Password
+	secret := f.FindMachine("aws-sso", "").Account
 
 	return username, passphrase, secret
 }
 
-// login with hardware MFA
+// login with MFA
 func ssoLogin(url string) {
-	username, passphrase,secret  := getCredentials()
+	username, passphrase, secret := getCredentials()
 	spinner.Message(color.MagentaString("init headless-browser \n"))
 	spinner.Pause()
 
@@ -112,14 +109,13 @@ func ssoLogin(url string) {
 		page.MustElementR("button", "Confirm and continue").MustClick()
 
 		// sign-in
-		page.Race().ElementR("label","Username").MustHandle(func(e *rod.Element) {
+		page.Race().ElementR("button", "Allow").MustHandle(func(e *rod.Element) {
+		}).ElementR("label", "Username").MustHandle(func(e *rod.Element) {
 			page.MustElement("#awsui-input-0").MustInput(username).MustType(input.Enter)
 			page.MustElement("#awsui-input-1").MustInput(passphrase).MustType(input.Enter)
 			mfa(*page, secret)
-			page.MustWaitLoad().MustElementR("button", "Allow").MustClick()
-		}).Element("#cli_login_button").MustHandle(func(e *rod.Element) {
-			e.MustWaitLoad().MustElementR("button", "Allow").MustClick()
 		}).MustDo()
+		page.MustWaitLoad().MustElementR("button", "Allow").MustClick()
 
 		// success page
 		page.MustElement(".awsui-signin-success")
@@ -141,7 +137,7 @@ func generateTOTP(secretKey string, timestamp int64) uint32 {
 	secretBytes, _ := base32Decoder.DecodeString(secretKey)
 
 	timeBytes := make([]byte, 8)
-	binary.BigEndian.PutUint64(timeBytes, uint64(timestamp) / 30)
+	binary.BigEndian.PutUint64(timeBytes, uint64(timestamp)/30)
 
 	hash := hmac.New(sha1.New, secretBytes)
 	hash.Write(timeBytes)
@@ -156,7 +152,7 @@ func generateTOTP(secretKey string, timestamp int64) uint32 {
 func mfa(page rod.Page, secret string) {
 	now := time.Now().Unix()
 	totpCode := generateTOTP(secret, now)
-	var tocken = fmt.Sprintf("%06d",totpCode)
+	var tocken = fmt.Sprintf("%06d", totpCode)
 	spinner.Message(tocken)
 	page.MustElement("#awsui-input-2").MustInput(tocken).MustType(input.Enter)
 	spinner.Message(color.YellowString("filling MFA"))
@@ -217,4 +213,3 @@ func error(errorMsg string) {
 	yellow := color.New(color.FgYellow).SprintFunc()
 	spinner.Message("Warn: " + yellow(errorMsg))
 }
-
